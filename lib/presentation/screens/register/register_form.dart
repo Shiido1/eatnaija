@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 
 
 class RegisterForm extends StatefulWidget {
+  final bool fromCheckOut;
+  RegisterForm({this.fromCheckOut});
   @override
   State<RegisterForm> createState() => _RegisterFormState();
 }
@@ -78,7 +80,8 @@ class _RegisterFormState extends State<RegisterForm>
 
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (BuildContext context) => OtpVerifyPage(otp: state.registerResponse.otp.toString())),
+                  builder: (BuildContext context) => OtpVerifyPage(otp: state.registerResponse.otp.toString(),
+                    fromCheckOut: widget.fromCheckOut,)),
               (Route<dynamic> route) => false);
         }
       },

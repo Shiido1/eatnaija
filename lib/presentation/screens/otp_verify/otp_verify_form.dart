@@ -16,8 +16,9 @@ import 'bloc/otp_verify_bloc.dart';
 class OtpVerifyForm extends StatefulWidget {
 
   final String otp;
+  final bool fromCheckout;
 
-  const OtpVerifyForm({Key key, this.otp}) : super(key: key);
+  const OtpVerifyForm({Key key, this.otp,this.fromCheckout}) : super(key: key);
 
   @override
   State<OtpVerifyForm> createState() => _OtpVerifyFormState();
@@ -99,7 +100,7 @@ class _OtpVerifyFormState extends State<OtpVerifyForm>
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      LoginScreen(userRepository: userRepository)),
+                      LoginScreen(userRepository: userRepository,fromCheckout: widget.fromCheckout)),
               (Route<dynamic> route) => false);
         }
         if (state is OtpVerifyInitialState) {

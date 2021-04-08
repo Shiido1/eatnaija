@@ -101,8 +101,12 @@ class CustomLoader {
       if (_isShowing) {
         try {
           _isShowing = false;
-          if (Navigator.of(_dismissingContext).canPop())
-            Navigator.of(_dismissingContext).pop();
+          // print("got here hide loader");
+          // Navigator.pop(_context);
+          // if (Navigator.of(_dismissingContext).canPop())
+          //   Navigator.of(_dismissingContext).pop();
+          if (Navigator.of(_context).canPop())
+            Navigator.of(_context).pop();
 
           return Future.value(true);
         } catch (_) {

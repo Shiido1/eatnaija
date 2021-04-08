@@ -10,9 +10,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rave_flutter/rave_flutter.dart';
+import 'package:get_it/get_it.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final int total;
+  final double total;
 
   const CheckoutPage({Key key, this.total}) : super(key: key);
 
@@ -26,6 +28,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   CustomLoader _loader;
   String address, phone;
   UserDao userDao = UserDao();
+  final cart = GetIt.I<CartItemsModel>();
 
   var user;
 

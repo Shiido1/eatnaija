@@ -32,6 +32,7 @@ class User {
   String _state;
   String _token;
   int _cart;
+  List<Map<String,int>> cartItems=[];
 
   int get id => _id;
   String get name => _name;
@@ -63,7 +64,6 @@ class User {
   set id(int value) {
     _id = value;
   }
-
   User({
       int id, 
       String name, 

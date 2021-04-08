@@ -22,9 +22,10 @@ class AddToCartFailedState extends AddToCartState {
 
 class AddToCartSuccessState extends AddToCartState {
   final ManageCartResponse cart;
+  final CartItemsModel currentCart = GetIt.I<CartItemsModel>();
 
   AddToCartSuccessState({this.cart});
 
   @override
-  List<Object> get props => [cart];
+  List<Object> get props => [cart,currentCart];
 }

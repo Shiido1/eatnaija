@@ -13,9 +13,7 @@ class FoodDetailRepository {
 
   Future<ManageCartResponse> addToCartRepo(String id) async {
     dynamic vendor = await userDao.getUser("nandom");
-
     var token = vendor["token"];
-
     ManageCartResponse cartResponse = await addToCartRequest(id, token);
 
     await updateCart(vendor, cartResponse.items);

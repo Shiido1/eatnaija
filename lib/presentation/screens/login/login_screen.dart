@@ -14,10 +14,13 @@ import 'login_form.dart';
 class LoginScreen extends StatelessWidget {
   final UserRepository userRepository;
   final foodItem;
+  final bool fromCheckout;
 
-  LoginScreen({Key key, @required this.userRepository, this.foodItem})
-      : assert(userRepository != null),
-        super(key: key);
+  // LoginScreen({Key key, @required this.userRepository, this.foodItem,this.fromCheckout})
+  //     : assert(userRepository != null),
+  //       super(key: key);
+  LoginScreen({Key key,this.userRepository, this.foodItem,this.fromCheckout})
+      :super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,7 @@ class LoginScreen extends StatelessWidget {
         create: (context) {
           return LoginBloc(
             authenticationBloc: BlocProvider.of<AuthenticationBloc>(context),
-            userRepository: userRepository,
+            userRepository: userRepository==null? UserRepository():userRepository,
           );
         },
         child: SafeArea(
@@ -92,7 +95,7 @@ class LoginScreen extends StatelessWidget {
                                             onTap: () => Navigator.of(context)
                                                 .push(MaterialPageRoute(
                                                     builder: (context) =>
-                                                        RegisterScreen())),
+                                                        RegisterScreen(fromCheckout:fromCheckout))),
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.fromLTRB(

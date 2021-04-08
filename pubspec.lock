@@ -276,7 +276,7 @@ packages:
     source: hosted
     version: "7.1.1"
   get_it:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: get_it
       url: "https://pub.dartlang.org"

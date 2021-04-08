@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:badges/badges.dart';
 import 'package:eatnaija/common/Utils.dart';
 import 'package:eatnaija/common/resources.dart';
@@ -8,6 +10,7 @@ import 'package:eatnaija/presentation/screens/allrestaurants/model/all_food_equi
 import 'package:eatnaija/presentation/screens/allrestaurants/model/all_food_port_response.dart';
 import 'package:eatnaija/presentation/screens/allrestaurants/model/all_restaurants_response.dart';
 import 'package:eatnaija/presentation/screens/cart/cart_items_page.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 import 'package:eatnaija/presentation/screens/food_detail/food_detail_page.dart';
 import 'package:eatnaija/presentation/screens/restaurant_foods/model/get_all_restaurant_food_response.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +21,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eatnaija/common/globals.dart' as global;
+import 'package:get_it/get_it.dart';
 
 import 'cubit/restaurant_foods_cubit.dart';
 
@@ -90,10 +94,10 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
     user = await userDao.getUser("nandom");
     // print(userDao);
 
-    var UserName = user["name"].toString().split(" ");
+    var UserName = user==null? "Guest": user["name"].toString().split(" ")[0];
 
     setState(() {
-      firstname = UserName[0];
+      firstname = UserName;
       cartItems = user["cart"];
     });
 
@@ -104,6 +108,7 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
 
   @override
   Widget build(BuildContext context) {
+    CartItemsModel cItem = GetIt.I<CartItemsModel>();
     return CubitProvider(
       create: (context) => RestaurantFoodsCubit(id: restaurants.id.toString()),
       child: Scaffold(
@@ -124,7 +129,9 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
                           (BuildContext context, bool innerBoxIsScrolled) {
                         return [
                           StreamBuilder(
-                              stream: global.numbersStream(),
+                              // stream: global.numbersStream(),
+                            stream: global.cartItemNumbers(),
+                              initialData: GetIt.I<CartItemsModel>().getCartItemsNumber(),
                               builder: (context, snapshot) {
                                 return SliverAppBar(
                                   backgroundColor: Resources.PRIMARY_COLOR,
@@ -147,9 +154,10 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
                                             },
                                             child: new Stack(
                                               children: <Widget>[
-                                                5 == 0
-                                                    ? new Container()
-                                                    : Badge(
+                                                // 5 == 0
+                                                //     ? new Container()
+                                                //     :
+                                                Badge(
                                                         badgeColor: Colors.red,
                                                         badgeContent: Text(
                                                           snapshot.data
@@ -215,12 +223,13 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
                                         },
                                         child: new Stack(
                                           children: <Widget>[
-                                            5 == 0
-                                                ? new Container()
-                                                : Badge(
+                                            // 5 == 0
+                                            //     ? new Container()
+                                            //     :
+                                            Badge(
                                                     badgeColor: Colors.red,
                                                     badgeContent: Text(
-                                                      'cartItems.toString()',
+                                                      cItem.getCartItemsNumber().toString(),
                                                       style: TextStyle(
                                                           color: Colors.white),
                                                     ),
@@ -304,6 +313,11 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
       ),
     );
   }
+  FutureOr onPopBack(){
+    setState((){
+
+    });
+  }
 
   Widget _myStoreItem(Menu sales, BuildContext context, int index) {
     return InkWell(
@@ -313,7 +327,8 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
             MaterialPageRoute(
                 builder: (context) => FoodDetailPage(
                       foodItem: sales,
-                    ))).then((value) => getUser());
+                    ))).then(onPopBack());
+        // then((value) => getUser());
         //   if (value != null) {
         //     var message = "";
         //     if (value == "2") message = "Food Updated Successfully";

@@ -49,14 +49,16 @@ class _HomeScreenState extends State<HomeScreen> {
     print(
         "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     print(user);
+    if(user != null){
+      var UserName = user["name"].toString().split(" ");
+      cartCount = user["cart"];
 
-    var UserName = user["name"].toString().split(" ");
-    cartCount = user["cart"];
+      userImage = user["image"];
+      setState(() {
+        firstname = UserName[0];
+      });
+    }
 
-    userImage = user["image"];
-    setState(() {
-      firstname = UserName[0];
-    });
   }
 
   @override
@@ -79,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         backgroundColor: Colors.grey,
                         child: CircleAvatar(
                           backgroundColor: Colors.white,
-                          backgroundImage: userImage != null
+                          backgroundImage: ((userImage != null)&&(userImage != ""))
                               ? NetworkImage(userImage)
                               : AssetImage("assets/images/default_image.png"),
                           radius: 30.0,

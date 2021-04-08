@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:eatnaija/common/globals.dart' as globals;
 import 'package:eatnaija/api_connection/api_connection.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 import 'package:eatnaija/presentation/screens/cart/model/cart_items_response.dart';
 import 'package:eatnaija/presentation/screens/cart/model/delete_cart_item_response.dart';
 import 'package:eatnaija/presentation/screens/cart/model/manage_cart_response.dart';
@@ -9,6 +10,7 @@ import 'package:eatnaija/presentation/screens/food_detail/model/cart_response.da
 
 import 'package:eatnaija/dao/user_dao.dart';
 import 'package:eatnaija/presentation/screens/login/models/user.dart';
+import 'package:get_it/get_it.dart';
 
 class AllCartItemsRepository {
   final userDao = UserDao();
@@ -21,6 +23,9 @@ class AllCartItemsRepository {
     CartItemsResponse uploadResponse = await getAllCartItems(token);
     List<AllCart> cartItems = uploadResponse.cart;
     return cartItems;
+  }
+  List<Map<String,dynamic>> getCartItemNew(){
+    return GetIt.I<CartItemsModel>().getCartItems();
   }
 
   Future<ManageCartResponse> addToCartRepo({String id}) async {

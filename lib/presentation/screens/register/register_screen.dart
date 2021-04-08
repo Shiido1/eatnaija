@@ -14,6 +14,8 @@ import 'package:flutter_svg/svg.dart';
 
 class RegisterScreen extends StatelessWidget {
   UserRepository userRepository = UserRepository();
+  final bool fromCheckout;
+  RegisterScreen({this.fromCheckout});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,7 @@ class RegisterScreen extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                RegisterForm(),
+                                RegisterForm(fromCheckOut: fromCheckout,),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Container(

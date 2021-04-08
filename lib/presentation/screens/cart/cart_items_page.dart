@@ -5,6 +5,7 @@ import 'package:eatnaija/common/app_state.dart';
 import 'package:eatnaija/common/custom_loader_indicator.dart';
 import 'package:eatnaija/common/resources.dart';
 import 'package:eatnaija/dao/user_dao.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 import 'package:eatnaija/presentation/screens/cart/model/cart_items_response.dart';
 import 'package:eatnaija/presentation/screens/checkout/checkout_page.dart';
 import 'package:eatnaija/presentation/screens/food_detail/bloc/add_to_cart_cubit.dart';
@@ -16,7 +17,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:eatnaija/common/globals.dart' as global;
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
+
+import 'package:eatnaija/bloc/authentication_bloc.dart';
+import 'package:eatnaija/presentation/screens/login/login_screen.dart';
 
 import 'cubit/all_cart_items_cubit.dart';
 
@@ -30,7 +35,8 @@ class _CartItemsPageState extends State<CartItemsPage> {
       new GlobalKey<RefreshIndicatorState>();
 
   List<AllCart> cartItems;
-  int total;
+  // int total;
+  double total;
   CustomLoader _loader;
 
   UserDao userDao = UserDao();
@@ -92,13 +98,16 @@ class _CartItemsPageState extends State<CartItemsPage> {
                         print("display cart valut");
                         },
                         child: StreamBuilder(
-                            stream: global.numbersStream(),
+                            // stream: global.numbersStream(),
+                            stream: global.cartItemNumbers(),
+                            initialData: GetIt.I<CartItemsModel>().getCartItemsNumber(),
                             builder: (context, snapshot) {
                               return new Stack(
                                 children: <Widget>[
-                                  5 == 0
-                                      ? new Container()
-                                      : Badge(
+                                  // 5 == 0
+                                  //     ? new Container()
+                                  //     :
+                                  Badge(
                                           badgeColor: Colors.red,
                                           badgeContent: Text(
                                             snapshot.data.toString(),
@@ -115,32 +124,36 @@ class _CartItemsPageState extends State<CartItemsPage> {
               ]),
           body: CubitListener<AllCartItemsCubit, AllCartItemsState>(
             listener: (context, state) {
+              CartItemsModel dCart = GetIt.I<CartItemsModel>();
+              global.streamController.sink.add(dCart.getCartItemsNumber());
+              total = dCart.getTotalPrice();
               if (state is AllCartItemsFailureState)
                 print("Error fetching carts");
               if (state is AddToCartItemsSuccess) {
-                total = 0;
+                // total = 0;
 
-                appState.updateCart(state.cartResponse.items);
+                // appState.updateCart(state.cartResponse.items);
 
-                global.streamController.sink.add(state.cartResponse.items);
+                // global.streamController.sink.add(state.cartResponse.items);
+
 
                 print("I have added ${state}");
 
-                final cartItem = cartItems.firstWhere((item) =>
-                    item.productId ==
-                    state.cartResponse.cart.productId.toString());
+                // final cartItem = cartItems.firstWhere((item) =>
+                //     item.productId ==
+                //     state.cartResponse.cart.productId.toString());
 
-                cartItem.quantity = state.cartResponse.cart.quantity.toString();
-                cartItem.price = state.cartResponse.cart.price.toString();
+                // cartItem.quantity = state.cartResponse.cart.quantity.toString();
+                // cartItem.price = state.cartResponse.cart.price.toString();
 
-                cartItems.forEach((element) {
-                  int myprice = int.parse(element.price);
-                  total += myprice;
-                });
+                // cartItems.forEach((element) {
+                //   int myprice = int.parse(element.price);
+                //   total += myprice;
+                // });
 
                 _loader.hideLoader();
                 Fluttertoast.showToast(
-                    msg: "Food Added to Cart",
+                    msg: "Cart updated",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.BOTTOM,
                     timeInSecForIosWeb: 1,
@@ -149,31 +162,32 @@ class _CartItemsPageState extends State<CartItemsPage> {
                     fontSize: 16.0);
               }
               if (state is SubtractFromCartItemsSuccess) {
-                total = 0;
+                // total = 0;
 
-                appState.updateCart(state.cartResponse.items);
+                // appState.updateCart(state.cartResponse.items);
 
-                global.streamController.sink.add(state.cartResponse.items);
+                // global.streamController.sink.add(state.cartResponse.items);
+                // global.streamController.sink.add(dCart.getCartItemsNumber());
 
-                context
-                    .cubit<CartCounterCubit>()
-                    .setCartCount(state.cartResponse.items);
-
-                final cartItem = cartItems.firstWhere((item) =>
-                    item.productId ==
-                    state.cartResponse.cart.productId.toString());
-
-                cartItem.quantity = state.cartResponse.cart.quantity.toString();
-                cartItem.price = state.cartResponse.cart.price.toString();
-
-                cartItems.forEach((element) {
-                  int myprice = int.parse(element.price);
-                  total += myprice;
-                });
+                // context
+                //     .cubit<CartCounterCubit>()
+                //     .setCartCount(state.cartResponse.items);
+                //
+                // final cartItem = cartItems.firstWhere((item) =>
+                //     item.productId ==
+                //     state.cartResponse.cart.productId.toString());
+                //
+                // cartItem.quantity = state.cartResponse.cart.quantity.toString();
+                // cartItem.price = state.cartResponse.cart.price.toString();
+                //
+                // cartItems.forEach((element) {
+                //   int myprice = int.parse(element.price);
+                //   total += myprice;
+                // });
 
                 _loader.hideLoader();
                 Fluttertoast.showToast(
-                    msg: "Food Removed to Cart",
+                    msg: "Cart updated",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.BOTTOM,
                     timeInSecForIosWeb: 1,
@@ -182,29 +196,29 @@ class _CartItemsPageState extends State<CartItemsPage> {
                     fontSize: 16.0);
               }
               if (state is DeleteFromCartItemsSuccess) {
-                total = 0;
+                // total = 0;
 
-                appState.updateCart(state.deleteResponse.items);
-
-                global.streamController.sink.add(state.deleteResponse.items);
-
-                final items = cartItems;
-
-                context
-                    .cubit<CartCounterCubit>()
-                    .setCartCount(state.deleteResponse.items);
-
-                cartItems.removeWhere(
-                    (element) => element.id.toString() == state.itemId);
-
-                cartItems.forEach((element) {
-                  int myprice = int.parse(element.price);
-                  total += myprice;
-                });
+                // appState.updateCart(state.deleteResponse.items);
+                //
+                // global.streamController.sink.add(state.deleteResponse.items);
+                //
+                // final items = cartItems;
+                //
+                // context
+                //     .cubit<CartCounterCubit>()
+                //     .setCartCount(state.deleteResponse.items);
+                //
+                // cartItems.removeWhere(
+                //     (element) => element.id.toString() == state.itemId);
+                //
+                // cartItems.forEach((element) {
+                //   int myprice = int.parse(element.price);
+                //   total += myprice;
+                // });
 
                 _loader.hideLoader();
                 Fluttertoast.showToast(
-                    msg: "Food Deleted from Cart",
+                    msg: "Cart updated",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.BOTTOM,
                     timeInSecForIosWeb: 1,
@@ -230,571 +244,609 @@ class _CartItemsPageState extends State<CartItemsPage> {
             },
             child: CubitBuilder<AllCartItemsCubit, AllCartItemsState>(
               builder: (context, state) {
-                if (state is AllCartItemsLoadingState) {
-                  return Center(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [Commons.loadingWidget("Loading Cart items")],
-                  ));
-                } else if (state is AllCartItemsSuccessState) {
-                  cartItems = state.cartItems;
-
-                  cartItems.forEach((element) {
-                    int myprice = int.parse(element.price);
-                    total += myprice;
-                  });
-
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
+                CartItemsModel cart = GetIt.I<CartItemsModel>();
+                List<Map<String,dynamic>> cItems = cart.getCartItems();
+                int itemQuantity = cart.getCartItemsNumber();
+                // print("state testing:");
+                // print(cart.getCartItems());
+                // print("price: "+ cart.getTotalPrice().toString());
+                return Container(
+                  child: itemQuantity < 1 ?
+                        Container(child: Center(child: Text("No items to display"),),)
+                        : Column(
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: ListView.builder(
+                        itemCount: cItems.length,
+                        itemBuilder: (context,ind) {
+                          return ListTile(
+                            title: Text(cItems[ind]['item'].name),
+                            trailing: Column(
+                              children: [
+                                Text("Quantity: "+cItems[ind]['quantity'].toString()),
+                                SizedBox(height: 20,),
+                                Text("Price: "+(cItems[ind]['quantity'] * double.parse(cItems[ind]['item'].price)).toString()),
+                              ],
+                            ),
+                          );
+                    }),
+                  ),
+                  Flexible(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0),
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        child: cartItems.isEmpty
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/svgs/empty-cart.svg",
-                                        height: 100.0,
-                                        width: 100.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  Text(
-                                    "No Cart Items found",
-                                    style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 18.0),
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 10,
-                                      child: ListView.builder(
-                                          itemCount: cartItems.length,
-                                          itemBuilder: (context, index) {
-                                            return cartItem(cartItems[index],
-                                                index, context);
-                                          }),
-                                    ),
-                                    Expanded(
-                                        flex: 3,
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30.0,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          "Total",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[900],
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          "₦${total}",
-                                                          style: TextStyle(
-                                                              color: Resources
-                                                                  .PRIMARY_COLOR,
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 20.0,
-                                                    ),
-                                                    _checkoutButton(
-                                                        context, total)
-                                                  ],
-                                                ),
-                                              ],
-                                            ))),
-                                  ],
-                                ),
-                              ),
-                        onRefresh: () async {
-                          print("it refreshed");
-                          if (state is! AllCartItemsLoadingState) {
-                            total = 0;
-                            cartItems = [];
-                            CubitProvider.of<AllCartItemsCubit>(context)
-                                .getAllCartItems();
-                          }
-                        },
-                      ),
+                      padding: const EdgeInsets.only(top:8.0,bottom: 8.0),
+                      child: _checkoutButton(context, total),
                     ),
-                  );
-                } else if (state is ManageCartLoading) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0),
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        child: cartItems.isEmpty
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/svgs/empty-box.svg",
-                                        height: 100.0,
-                                        width: 100.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  Text(
-                                    "No Categories found",
-                                    style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 18.0),
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 9,
-                                      child: ListView.builder(
-                                          itemCount: cartItems.length,
-                                          itemBuilder: (context, index) {
-                                            return cartItem(cartItems[index],
-                                                index, context);
-                                          }),
-                                    ),
-                                    Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30.0,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          "Total",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[900],
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          "₦${total}",
-                                                          style: TextStyle(
-                                                              color: Resources
-                                                                  .PRIMARY_COLOR,
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 20.0,
-                                                    ),
-                                                    _checkoutButton(
-                                                        context, total)
-                                                  ],
-                                                ),
-                                              ],
-                                            ))),
-                                  ],
-                                ),
-                              ),
-                        onRefresh: () async {
-                          print("it refreshed");
-                          if (state is! AllCartItemsLoadingState) {
-                            total = 0;
-                            cartItems = [];
-                            CubitProvider.of<AllCartItemsCubit>(context)
-                                .getAllCartItems();
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                } else if (state is AddToCartItemsSuccess) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0),
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        child: cartItems.isEmpty
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/svgs/empty-box.svg",
-                                        height: 100.0,
-                                        width: 100.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  Text(
-                                    "No Categories found",
-                                    style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 18.0),
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 9,
-                                      child: ListView.builder(
-                                          itemCount: cartItems.length,
-                                          itemBuilder: (context, index) {
-                                            return cartItem(cartItems[index],
-                                                index, context);
-                                          }),
-                                    ),
-                                    Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30.0,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          "Total",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[900],
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          "₦${total}",
-                                                          style: TextStyle(
-                                                              color: Resources
-                                                                  .PRIMARY_COLOR,
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 20.0,
-                                                    ),
-                                                    _checkoutButton(
-                                                        context, total)
-                                                  ],
-                                                ),
-                                              ],
-                                            ))),
-                                  ],
-                                ),
-                              ),
-                        onRefresh: () async {
-                          print("it refreshed");
-                          if (state is! AllCartItemsLoadingState) {
-                            total = 0;
-                            cartItems = [];
-                            CubitProvider.of<AllCartItemsCubit>(context)
-                                .getAllCartItems();
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                } else if (state is SubtractFromCartItemsSuccess) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0),
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        child: cartItems.isEmpty
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/svgs/empty-box.svg",
-                                        height: 100.0,
-                                        width: 100.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  Text(
-                                    "No Categories found",
-                                    style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 18.0),
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 9,
-                                      child: ListView.builder(
-                                          itemCount: cartItems.length,
-                                          itemBuilder: (context, index) {
-                                            return cartItem(cartItems[index],
-                                                index, context);
-                                          }),
-                                    ),
-                                    Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30.0,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          "Total",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[900],
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          "₦${total}",
-                                                          style: TextStyle(
-                                                              color: Resources
-                                                                  .PRIMARY_COLOR,
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 20.0,
-                                                    ),
-                                                    _checkoutButton(
-                                                        context, total)
-                                                  ],
-                                                ),
-                                              ],
-                                            ))),
-                                  ],
-                                ),
-                              ),
-                        onRefresh: () async {
-                          print("it refreshed");
-                          if (state is! AllCartItemsLoadingState) {
-                            total = 0;
-                            cartItems = [];
-                            CubitProvider.of<AllCartItemsCubit>(context)
-                                .getAllCartItems();
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                } else if (state is DeleteFromCartItemsSuccess) {
-                  return Container(
-                    height: MediaQuery.of(context).size.height,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 18.0),
-                      child: RefreshIndicator(
-                        key: _refreshIndicatorKey,
-                        child: cartItems.isEmpty
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SvgPicture.asset(
-                                        "assets/svgs/empty-box.svg",
-                                        height: 100.0,
-                                        width: 100.0,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 20.0),
-                                  Text(
-                                    "No Food Items found",
-                                    style: TextStyle(
-                                        color: Colors.grey[600],
-                                        fontSize: 18.0),
-                                  ),
-                                ],
-                              )
-                            : Container(
-                                child: Column(
-                                  children: [
-                                    Expanded(
-                                      flex: 9,
-                                      child: ListView.builder(
-                                          itemCount: cartItems.length,
-                                          itemBuilder: (context, index) {
-                                            return cartItem(cartItems[index],
-                                                index, context);
-                                          }),
-                                    ),
-                                    Expanded(
-                                        flex: 2,
-                                        child: Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                30.0,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          "Total",
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[900],
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        Text(
-                                                          "₦${total}",
-                                                          style: TextStyle(
-                                                              color: Resources
-                                                                  .PRIMARY_COLOR,
-                                                              fontSize: 22.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 20.0,
-                                                    ),
-                                                    _checkoutButton(
-                                                        context, total)
-                                                  ],
-                                                ),
-                                              ],
-                                            ))),
-                                  ],
-                                ),
-                              ),
-                        onRefresh: () async {
-                          print("it refreshed");
-                          if (state is! AllCartItemsLoadingState) {
-                            total = 0;
-                            cartItems = [];
-                            CubitProvider.of<AllCartItemsCubit>(context)
-                                .getAllCartItems();
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                } else {
-                  return Center(
-                    child: Text("Error loading My categories"),
-                  );
-                }
+                  )
+                ],
+                ),
+                );
+                // if (state is AllCartItemsLoadingState) {
+                //   return Center(
+                //       child: Column(
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //         children: [Commons.loadingWidget("Loading Cart items")],
+                //     ));
+                // } else if (state is AllCartItemsSuccessState) {
+                //   cartItems = state.cartItems;
+                //
+                //   cartItems.forEach((element) {
+                //     int myprice = int.parse(element.price);
+                //     total += myprice;
+                //   });
+                //
+                //   return Container(
+                //     height: MediaQuery.of(context).size.height,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(top: 18.0),
+                //       child: RefreshIndicator(
+                //         key: _refreshIndicatorKey,
+                //         child: cartItems.isEmpty
+                //             ? Column(
+                //                 mainAxisAlignment: MainAxisAlignment.center,
+                //                 crossAxisAlignment: CrossAxisAlignment.center,
+                //                 children: [
+                //                   Row(
+                //                     mainAxisAlignment: MainAxisAlignment.center,
+                //                     children: [
+                //                       SvgPicture.asset(
+                //                         "assets/svgs/empty-cart.svg",
+                //                         height: 100.0,
+                //                         width: 100.0,
+                //                         color: Colors.grey[600],
+                //                       ),
+                //                     ],
+                //                   ),
+                //                   SizedBox(height: 20.0),
+                //                   Text(
+                //                     "No Cart Items found",
+                //                     style: TextStyle(
+                //                         color: Colors.grey[600],
+                //                         fontSize: 18.0),
+                //                   ),
+                //                 ],
+                //               )
+                //             : Container(
+                //                 child: Column(
+                //                   children: [
+                //                     Expanded(
+                //                       flex: 10,
+                //                       child: ListView.builder(
+                //                           itemCount: cartItems.length,
+                //                           itemBuilder: (context, index) {
+                //                             return cartItem(cartItems[index],
+                //                                 index, context);
+                //                           }),
+                //                     ),
+                //                     Expanded(
+                //                         flex: 3,
+                //                         child: Container(
+                //                             width: MediaQuery.of(context)
+                //                                     .size
+                //                                     .width -
+                //                                 30.0,
+                //                             child: Column(
+                //                               mainAxisAlignment:
+                //                                   MainAxisAlignment.center,
+                //                               children: [
+                //                                 Column(
+                //                                   children: [
+                //                                     Row(
+                //                                       mainAxisAlignment:
+                //                                           MainAxisAlignment
+                //                                               .spaceBetween,
+                //                                       children: [
+                //                                         Text(
+                //                                           "Total",
+                //                                           style: TextStyle(
+                //                                               color: Colors
+                //                                                   .grey[900],
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                         Text(
+                //                                           "₦${total}",
+                //                                           style: TextStyle(
+                //                                               color: Resources
+                //                                                   .PRIMARY_COLOR,
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                       ],
+                //                                     ),
+                //                                     SizedBox(
+                //                                       height: 20.0,
+                //                                     ),
+                //                                     _checkoutButton(
+                //                                         context, total)
+                //                                   ],
+                //                                 ),
+                //                               ],
+                //                             ))),
+                //                   ],
+                //                 ),
+                //               ),
+                //         onRefresh: () async {
+                //           print("it refreshed");
+                //           if (state is! AllCartItemsLoadingState) {
+                //             total = 0;
+                //             cartItems = [];
+                //             CubitProvider.of<AllCartItemsCubit>(context)
+                //                 .getAllCartItems();
+                //           }
+                //         },
+                //       ),
+                //     ),
+                //   );
+                // } else if (state is ManageCartLoading) {
+                //   return Container(
+                //     height: MediaQuery.of(context).size.height,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(top: 18.0),
+                //       child: RefreshIndicator(
+                //         key: _refreshIndicatorKey,
+                //         child: cartItems.isEmpty
+                //             ? Column(
+                //                 mainAxisAlignment: MainAxisAlignment.center,
+                //                 crossAxisAlignment: CrossAxisAlignment.center,
+                //                 children: [
+                //                   Row(
+                //                     mainAxisAlignment: MainAxisAlignment.center,
+                //                     children: [
+                //                       SvgPicture.asset(
+                //                         "assets/svgs/empty-box.svg",
+                //                         height: 100.0,
+                //                         width: 100.0,
+                //                         color: Colors.grey[600],
+                //                       ),
+                //                     ],
+                //                   ),
+                //                   SizedBox(height: 20.0),
+                //                   Text(
+                //                     "No Categories found",
+                //                     style: TextStyle(
+                //                         color: Colors.grey[600],
+                //                         fontSize: 18.0),
+                //                   ),
+                //                 ],
+                //               )
+                //             : Container(
+                //                 child: Column(
+                //                   children: [
+                //                     Expanded(
+                //                       flex: 9,
+                //                       child: ListView.builder(
+                //                           itemCount: cartItems.length,
+                //                           itemBuilder: (context, index) {
+                //                             return cartItem(cartItems[index],
+                //                                 index, context);
+                //                           }),
+                //                     ),
+                //                     Expanded(
+                //                         flex: 2,
+                //                         child: Container(
+                //                             width: MediaQuery.of(context)
+                //                                     .size
+                //                                     .width -
+                //                                 30.0,
+                //                             child: Column(
+                //                               mainAxisAlignment:
+                //                                   MainAxisAlignment.center,
+                //                               children: [
+                //                                 Column(
+                //                                   children: [
+                //                                     Row(
+                //                                       mainAxisAlignment:
+                //                                           MainAxisAlignment
+                //                                               .spaceBetween,
+                //                                       children: [
+                //                                         Text(
+                //                                           "Total",
+                //                                           style: TextStyle(
+                //                                               color: Colors
+                //                                                   .grey[900],
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                         Text(
+                //                                           // "₦${total}",
+                //                                           "₦$total",
+                //                                           style: TextStyle(
+                //                                               color: Resources
+                //                                                   .PRIMARY_COLOR,
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                       ],
+                //                                     ),
+                //                                     SizedBox(
+                //                                       height: 20.0,
+                //                                     ),
+                //                                     _checkoutButton(
+                //                                         context, total)
+                //                                   ],
+                //                                 ),
+                //                               ],
+                //                             ))),
+                //                   ],
+                //                 ),
+                //               ),
+                //         onRefresh: () async {
+                //           print("it refreshed");
+                //           if (state is! AllCartItemsLoadingState) {
+                //             total = 0;
+                //             cartItems = [];
+                //             CubitProvider.of<AllCartItemsCubit>(context)
+                //                 .getAllCartItems();
+                //           }
+                //         },
+                //       ),
+                //     ),
+                //   );
+                // } else if (state is AddToCartItemsSuccess) {
+                //   return Container(
+                //     height: MediaQuery.of(context).size.height,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(top: 18.0),
+                //       child: RefreshIndicator(
+                //         key: _refreshIndicatorKey,
+                //         child: cartItems.isEmpty
+                //             ? Column(
+                //                 mainAxisAlignment: MainAxisAlignment.center,
+                //                 crossAxisAlignment: CrossAxisAlignment.center,
+                //                 children: [
+                //                   Row(
+                //                     mainAxisAlignment: MainAxisAlignment.center,
+                //                     children: [
+                //                       SvgPicture.asset(
+                //                         "assets/svgs/empty-box.svg",
+                //                         height: 100.0,
+                //                         width: 100.0,
+                //                         color: Colors.grey[600],
+                //                       ),
+                //                     ],
+                //                   ),
+                //                   SizedBox(height: 20.0),
+                //                   Text(
+                //                     "No Categories found",
+                //                     style: TextStyle(
+                //                         color: Colors.grey[600],
+                //                         fontSize: 18.0),
+                //                   ),
+                //                 ],
+                //               )
+                //             : Container(
+                //                 child: Column(
+                //                   children: [
+                //                     Expanded(
+                //                       flex: 9,
+                //                       child: ListView.builder(
+                //                           itemCount: cartItems.length,
+                //                           itemBuilder: (context, index) {
+                //                             return cartItem(cartItems[index],
+                //                                 index, context);
+                //                           }),
+                //                     ),
+                //                     Expanded(
+                //                         flex: 2,
+                //                         child: Container(
+                //                             width: MediaQuery.of(context)
+                //                                     .size
+                //                                     .width -
+                //                                 30.0,
+                //                             child: Column(
+                //                               mainAxisAlignment:
+                //                                   MainAxisAlignment.center,
+                //                               children: [
+                //                                 Column(
+                //                                   children: [
+                //                                     Row(
+                //                                       mainAxisAlignment:
+                //                                           MainAxisAlignment
+                //                                               .spaceBetween,
+                //                                       children: [
+                //                                         Text(
+                //                                           "Total",
+                //                                           style: TextStyle(
+                //                                               color: Colors
+                //                                                   .grey[900],
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                         Text(
+                //                                           "₦${total}",
+                //                                           style: TextStyle(
+                //                                               color: Resources
+                //                                                   .PRIMARY_COLOR,
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                       ],
+                //                                     ),
+                //                                     SizedBox(
+                //                                       height: 20.0,
+                //                                     ),
+                //                                     _checkoutButton(
+                //                                         context, total)
+                //                                   ],
+                //                                 ),
+                //                               ],
+                //                             ))),
+                //                   ],
+                //                 ),
+                //               ),
+                //         onRefresh: () async {
+                //           print("it refreshed");
+                //           if (state is! AllCartItemsLoadingState) {
+                //             total = 0;
+                //             cartItems = [];
+                //             CubitProvider.of<AllCartItemsCubit>(context)
+                //                 .getAllCartItems();
+                //           }
+                //         },
+                //       ),
+                //     ),
+                //   );
+                // } else if (state is SubtractFromCartItemsSuccess) {
+                //   return Container(
+                //     height: MediaQuery.of(context).size.height,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(top: 18.0),
+                //       child: RefreshIndicator(
+                //         key: _refreshIndicatorKey,
+                //         child: cartItems.isEmpty
+                //             ? Column(
+                //                 mainAxisAlignment: MainAxisAlignment.center,
+                //                 crossAxisAlignment: CrossAxisAlignment.center,
+                //                 children: [
+                //                   Row(
+                //                     mainAxisAlignment: MainAxisAlignment.center,
+                //                     children: [
+                //                       SvgPicture.asset(
+                //                         "assets/svgs/empty-box.svg",
+                //                         height: 100.0,
+                //                         width: 100.0,
+                //                         color: Colors.grey[600],
+                //                       ),
+                //                     ],
+                //                   ),
+                //                   SizedBox(height: 20.0),
+                //                   Text(
+                //                     "No Categories found",
+                //                     style: TextStyle(
+                //                         color: Colors.grey[600],
+                //                         fontSize: 18.0),
+                //                   ),
+                //                 ],
+                //               )
+                //             : Container(
+                //                 child: Column(
+                //                   children: [
+                //                     Expanded(
+                //                       flex: 9,
+                //                       child: ListView.builder(
+                //                           itemCount: cartItems.length,
+                //                           itemBuilder: (context, index) {
+                //                             return cartItem(cartItems[index],
+                //                                 index, context);
+                //                           }),
+                //                     ),
+                //                     Expanded(
+                //                         flex: 2,
+                //                         child: Container(
+                //                             width: MediaQuery.of(context)
+                //                                     .size
+                //                                     .width -
+                //                                 30.0,
+                //                             child: Column(
+                //                               mainAxisAlignment:
+                //                                   MainAxisAlignment.center,
+                //                               children: [
+                //                                 Column(
+                //                                   children: [
+                //                                     Row(
+                //                                       mainAxisAlignment:
+                //                                           MainAxisAlignment
+                //                                               .spaceBetween,
+                //                                       children: [
+                //                                         Text(
+                //                                           "Total",
+                //                                           style: TextStyle(
+                //                                               color: Colors
+                //                                                   .grey[900],
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                         Text(
+                //                                           "₦${total}",
+                //                                           style: TextStyle(
+                //                                               color: Resources
+                //                                                   .PRIMARY_COLOR,
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                       ],
+                //                                     ),
+                //                                     SizedBox(
+                //                                       height: 20.0,
+                //                                     ),
+                //                                     _checkoutButton(
+                //                                         context, total)
+                //                                   ],
+                //                                 ),
+                //                               ],
+                //                             ))),
+                //                   ],
+                //                 ),
+                //               ),
+                //         onRefresh: () async {
+                //           print("it refreshed");
+                //           if (state is! AllCartItemsLoadingState) {
+                //             total = 0;
+                //             cartItems = [];
+                //             CubitProvider.of<AllCartItemsCubit>(context)
+                //                 .getAllCartItems();
+                //           }
+                //         },
+                //       ),
+                //     ),
+                //   );
+                // } else if (state is DeleteFromCartItemsSuccess) {
+                //   return Container(
+                //     height: MediaQuery.of(context).size.height,
+                //     child: Padding(
+                //       padding: const EdgeInsets.only(top: 18.0),
+                //       child: RefreshIndicator(
+                //         key: _refreshIndicatorKey,
+                //         child: cartItems.isEmpty
+                //             ? Column(
+                //                 mainAxisAlignment: MainAxisAlignment.center,
+                //                 crossAxisAlignment: CrossAxisAlignment.center,
+                //                 children: [
+                //                   Row(
+                //                     mainAxisAlignment: MainAxisAlignment.center,
+                //                     children: [
+                //                       SvgPicture.asset(
+                //                         "assets/svgs/empty-box.svg",
+                //                         height: 100.0,
+                //                         width: 100.0,
+                //                         color: Colors.grey[600],
+                //                       ),
+                //                     ],
+                //                   ),
+                //                   SizedBox(height: 20.0),
+                //                   Text(
+                //                     "No Food Items found",
+                //                     style: TextStyle(
+                //                         color: Colors.grey[600],
+                //                         fontSize: 18.0),
+                //                   ),
+                //                 ],
+                //               )
+                //             : Container(
+                //                 child: Column(
+                //                   children: [
+                //                     Expanded(
+                //                       flex: 9,
+                //                       child: ListView.builder(
+                //                           itemCount: cartItems.length,
+                //                           itemBuilder: (context, index) {
+                //                             return cartItem(cartItems[index],
+                //                                 index, context);
+                //                           }),
+                //                     ),
+                //                     Expanded(
+                //                         flex: 2,
+                //                         child: Container(
+                //                             width: MediaQuery.of(context)
+                //                                     .size
+                //                                     .width -
+                //                                 30.0,
+                //                             child: Column(
+                //                               mainAxisAlignment:
+                //                                   MainAxisAlignment.center,
+                //                               children: [
+                //                                 Column(
+                //                                   children: [
+                //                                     Row(
+                //                                       mainAxisAlignment:
+                //                                           MainAxisAlignment
+                //                                               .spaceBetween,
+                //                                       children: [
+                //                                         Text(
+                //                                           "Total",
+                //                                           style: TextStyle(
+                //                                               color: Colors
+                //                                                   .grey[900],
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                         Text(
+                //                                           "₦${total}",
+                //                                           style: TextStyle(
+                //                                               color: Resources
+                //                                                   .PRIMARY_COLOR,
+                //                                               fontSize: 22.0,
+                //                                               fontWeight:
+                //                                                   FontWeight
+                //                                                       .bold),
+                //                                         ),
+                //                                       ],
+                //                                     ),
+                //                                     SizedBox(
+                //                                       height: 20.0,
+                //                                     ),
+                //                                     _checkoutButton(
+                //                                         context, total)
+                //                                   ],
+                //                                 ),
+                //                               ],
+                //                             ))),
+                //                   ],
+                //                 ),
+                //               ),
+                //         onRefresh: () async {
+                //           print("it refreshed");
+                //           if (state is! AllCartItemsLoadingState) {
+                //             total = 0;
+                //             cartItems = [];
+                //             CubitProvider.of<AllCartItemsCubit>(context)
+                //                 .getAllCartItems();
+                //           }
+                //         },
+                //       ),
+                //     ),
+                //   );
+                // } else {
+                //   return Center(
+                //     child: Text("Error loading My categories"),
+                //   );
+                // }
               },
             ),
           ),
         ));
   }
 
-  Widget _checkoutButton(BuildContext context, int total) {
+  Widget _checkoutButton(BuildContext context, double total) {
     return InkWell(
       onTap: () => _navigateToCheckout(context, total),
       child: Container(
@@ -813,10 +865,18 @@ class _CartItemsPageState extends State<CartItemsPage> {
     );
   }
 
-  _navigateToCheckout(BuildContext context, int total) {
+  _navigateToCheckout(BuildContext context, double total) {
     print("we are here");
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => CheckoutPage(total: total)));
+    final authState = Provider.of<AuthenticationBloc>(context,listen: false).state;
+    if(authState is AuthenticationAuthenticated){
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => CheckoutPage(total: total)));
+    }else{
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => LoginScreen(fromCheckout: true,)));
+    }
+    // if(appState.)
+
   }
 
   Widget cartItem(AllCart cart, int index, BuildContext context) {
