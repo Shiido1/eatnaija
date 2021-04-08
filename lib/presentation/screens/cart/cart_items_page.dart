@@ -137,7 +137,7 @@ class _CartItemsPageState extends State<CartItemsPage> {
                 // global.streamController.sink.add(state.cartResponse.items);
 
 
-                print("I have added ${state}");
+                // print("I have added ${state}");
 
                 // final cartItem = cartItems.firstWhere((item) =>
                 //     item.productId ==
@@ -260,23 +260,122 @@ class _CartItemsPageState extends State<CartItemsPage> {
                     child: ListView.builder(
                         itemCount: cItems.length,
                         itemBuilder: (context,ind) {
-                          return ListTile(
-                            title: Text(cItems[ind]['item'].name),
-                            trailing: Column(
+                          return Container(
+                            margin: EdgeInsets.only(top:20),
+                            child: Stack(
                               children: [
-                                Text("Quantity: "+cItems[ind]['quantity'].toString()),
-                                SizedBox(height: 20,),
-                                Text("Price: "+(cItems[ind]['quantity'] * double.parse(cItems[ind]['item'].price)).toString()),
-                              ],
-                            ),
+                                Card(
+                                // elevation:1,
+                                  margin: EdgeInsets.only(top:40,right: 10.0,left: 10.0),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      // mainAxisAlignment : MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment : MainAxisAlignment.spaceBetween,
+                                        children:[
+                                          Padding(
+                                            padding: const EdgeInsets.only(left:20.0),
+                                            child: Text(cItems[ind]['item'].name),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete),
+                                            color:Colors.red,
+                                            onPressed: (){
+                                              print('pressed');
+                                            },
+                                          )
+                                        ]
+                                      ),
+                                      // ListTile(
+                                      //   leading: Text(cItems[ind]['item'].name),
+                                      //   trailing: IconButton(
+                                      //     icon: Icon(Icons.delete),
+                                      //     onPressed: (){
+                                      //     },
+                                      //   )
+                                      // ),
+                                      Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment : MainAxisAlignment.spaceBetween,
+                                        children:[
+                                          Row(
+                                              children:[
+                                                IconButton(
+                                                    icon: Icon(Icons.add),
+                                                    onPressed: (){
+                                                      cart.increaseItemQuantity(cItems[ind]['item'].id);
+                                                      print(cItems[ind]['item'].toString());
+                                                      setState((){
+
+                                                        total = cart.getTotalPrice();
+                                                      });
+                                                    }
+                                                ),
+                                                Text(cItems[ind]['quantity'].toString()),
+                                                IconButton(
+                                                    icon: Icon(Icons.remove),
+                                                    onPressed: (){
+                                                      cart.decreaseItemQuantity(cItems[ind]['item'].id);
+                                                      setState((){
+
+                                                        total = cart.getTotalPrice();
+                                                      });
+                                                    }
+                                                ),
+                                              ]
+                                          ),
+                                          Text((cItems[ind]['quantity'] * double.parse(cItems[ind]['item'].price)).toString(),
+                                              style:TextStyle(color:Colors.red,fontWeight:FontWeight.bold)),
+                                        ]
+                                      ),
+                                      // ListTile(
+                                      //   leading:
+                                      //   trailing:
+                                      // )
+                                    ]
+                                  ),
+                                )
+                              ),
+                                Center(child: CircleAvatar(radius:40.0)),
+                              ]
+                            )
                           );
+                          //   ListTile(
+                          //   title: Text(cItems[ind]['item'].name),
+                          //   trailing: Column(
+                          //     children: [
+                          //       Text("Quantity: "+cItems[ind]['quantity'].toString()),
+                          //       SizedBox(height: 20,),
+                          //       Text("Price: "+(cItems[ind]['quantity'] * double.parse(cItems[ind]['item'].price)).toString()),
+                          //     ],
+                          //   ),
+                          // );
                     }),
                   ),
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top:8.0,bottom: 8.0),
-                      child: _checkoutButton(context, total),
-                    ),
+                  Row(
+                    // crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment : MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width:100,
+                        child: Column(
+                          children:[
+                            Text("Total",style:TextStyle(fontWeight:FontWeight.bold)),
+                            Text(total.toString(),style:TextStyle(color:Colors.red)),
+                          ]
+                        ),
+                      ),
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top:8.0,bottom: 8.0,right: 10),
+                          child: _checkoutButton(context, total),
+                        ),
+                      ),
+                    ],
                   )
                 ],
                 ),

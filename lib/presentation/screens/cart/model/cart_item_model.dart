@@ -18,6 +18,20 @@ class CartItemsModel{
       items.add(item);
     }
   }
+  void increaseItemQuantity(int itemId){
+    var target = items.firstWhere((e)=>e['item'].id==itemId, orElse:()=>null);
+    if(target != null){
+      items[items.indexWhere((itm)=>itm['item'].id==itemId)]['quantity'] += 1;
+    }
+  }
+  void decreaseItemQuantity(int itemId){
+    var target = items.firstWhere((e)=>e['item'].id==itemId, orElse:()=>null);
+    if(target != null){
+      if(target['quantity'] > 0){
+        items[items.indexWhere((itm)=>itm['item'].id==itemId)]['quantity'] -= 1;
+      }
+    }
+  }
   void removeCartItem(Menu item){
     var target = items.firstWhere((e)=>e['item']==item, orElse:()=>null);
     if(target != null){
