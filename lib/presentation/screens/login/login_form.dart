@@ -11,13 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get_it/get_it.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
+import 'package:eatnaija/presentation/screens/checkout/checkout_page.dart';
+import 'package:eatnaija/presentation/screens/home/home_page.dart';
 
 import 'bloc/login_bloc.dart';
 
 class LoginForm extends StatefulWidget {
   final foodItem;
-
-  const LoginForm({Key key, this.foodItem}) : super(key: key);
+  final fromCheckout;
+  const LoginForm({Key key, this.foodItem,this.fromCheckout}) : super(key: key);
   @override
   State<LoginForm> createState() => _LoginFormState();
 }
@@ -74,12 +78,20 @@ class _LoginFormState extends State<LoginForm> with TickerProviderStateMixin {
         }
         if (state is LoginSuccess) {
           print("wer are going there");
-          Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                  builder: (BuildContext context) => FoodDetailPage(
-                        foodItem: widget.foodItem,
-                      )),
-              (Route<dynamic> route) => false);
+          if(widget.fromCheckout != null && widget.fromCheckout){
+            final cartItems = GetIt.I<CartItemsModel>();
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => CheckoutPage(total: cartItems.getTotalPrice())));
+          }else{
+            Navigator.of(context).push(MaterialPageRoute(builder:(context)=>HomePage()));
+            // Navigator.of(context).pushAndRemoveUntil(
+            //     MaterialPageRoute(
+            //         builder: (BuildContext context) => FoodDetailPage(
+            //           foodItem: widget.foodItem,
+            //         )),
+            //         (Route<dynamic> route) => false);
+          }
+
         }
         if (state is LoginInitial) {
           Commons.hideKeyboard(context);

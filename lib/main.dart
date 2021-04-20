@@ -1,4 +1,9 @@
+
+
 import 'package:eatnaija/presentation/router/app_router.dart';
+import 'package:eatnaija/presentation/screens/cart/bloc/cart_bloc.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
+import 'package:eatnaija/presentation/screens/food_detail/bloc/add_to_cart_cubit.dart';
 import 'package:eatnaija/presentation/screens/home/home_page.dart';
 import 'package:eatnaija/presentation/screens/home/home_screen.dart';
 import 'package:eatnaija/presentation/screens/login/login_screen.dart';
@@ -10,12 +15,14 @@ import 'package:eatnaija/common/globals.dart' as globals;
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:provider/provider.dart';
 
 import 'bloc/authentication_bloc.dart';
 import 'common/app_state.dart';
 import 'common/loading_indicator.dart';
 import 'common/resources.dart';
+import 'common/service_locator.dart';
 
 class SimpleBlocDelegate extends BlocDelegate {
   @override
@@ -37,12 +44,28 @@ class SimpleBlocDelegate extends BlocDelegate {
 }
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  setUp();
   BlocSupervisor.delegate = SimpleBlocDelegate();
   final userRepository = UserRepository();
 
   runApp(ChangeNotifierProvider<AppState>(
     create: (_) => AppState(),
-    child: BlocProvider<AuthenticationBloc>(
+    child:
+    // MultiBlocProvider(
+    //   providers: [
+    //     BlocProvider<AuthenticationBloc>(
+    //       create: (context) {
+    //         return AuthenticationBloc(userRepository: userRepository)
+    //           ..add(AppStarted());
+    //       },
+    //       child: App(userRepository: userRepository),
+    //     ),
+    //     BlocProvider<CartBloc>(create: (context)=>CartBloc(cartItemsModel: cartItemsModel)),
+    //   ],
+    //   child: App(userRepository: userRepository),
+    // ),
+    BlocProvider<AuthenticationBloc>(
       create: (context) {
         return AuthenticationBloc(userRepository: userRepository)
           ..add(AppStarted());

@@ -14,8 +14,8 @@ import 'bloc/otp_verify_bloc.dart';
 class OtpVerifyPage extends StatefulWidget {
 
   final String otp;
-
-  OtpVerifyPage({Key key, this.otp}) : super(key: key);
+  final bool fromCheckOut;
+  OtpVerifyPage({Key key, this.otp,this.fromCheckOut}) : super(key: key);
 
   @override
   _OtpVerifyPageState createState() => _OtpVerifyPageState();
@@ -103,7 +103,7 @@ class _OtpVerifyPageState extends State<OtpVerifyPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  OtpVerifyForm(otp: widget.otp),
+                                  OtpVerifyForm(otp: widget.otp,fromCheckout: widget.fromCheckOut,),
                                 ],
                               ),
                             ),

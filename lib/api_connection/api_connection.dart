@@ -138,10 +138,12 @@ Future<ManageCartResponse> addToCartRequest(String foodId, String token) async {
       print(response.body);
       return ManageCartResponse.fromJson(json.decode(response.body));
     }
+    return null;
   } catch (e) {
     FailureException failureException = FailureException(e);
     throw failureException.response();
   }
+  return null;
 }
 
 Future<ChangePasswordResponse> changePassword(

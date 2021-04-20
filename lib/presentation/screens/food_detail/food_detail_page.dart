@@ -5,12 +5,14 @@ import 'package:eatnaija/common/custom_loader_indicator.dart';
 import 'package:eatnaija/common/resources.dart';
 import 'package:eatnaija/dao/user_dao.dart';
 import 'package:eatnaija/presentation/screens/cart/cart_items_page.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 import 'package:eatnaija/presentation/screens/food_detail/bloc/add_to_cart_cubit.dart';
 import 'package:eatnaija/presentation/screens/restaurant_foods/model/get_all_restaurant_food_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +71,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
     final appState = Provider.of<AppState>(context);
 
     appState.getCart;
-
+    int orderQuantity = 1;
     return CubitProvider<AddToCartCubit>(
       create: (context) => AddToCartCubit(id: widget.foodItem.id.toString()),
       child: Scaffold(
@@ -90,21 +92,31 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                     new CartItemsPage()))
                             .then((value) => getUser());
                       },
-                      child: StreamBuilder(
-                          stream: global.numbersStream(),
+                      child: StreamBuilder<int>(
+                        // stream: global.numbersStream(),
+                          stream: global.cartItemNumbers(),
+                          initialData: GetIt.I<CartItemsModel>().getCartItemsNumber(),
                           builder: (context, snapshot) {
                             return new Stack(
                               children: <Widget>[
-                                5 == 0
-                                    ? new Container()
-                                    : Badge(
-                                        badgeColor: Colors.red,
-                                        badgeContent: Text(
-                                          snapshot.data.toString(),
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                        child: Icon(Icons.shopping_cart),
-                                      )
+                                Badge(
+                                  badgeColor: Colors.red,
+                                  badgeContent: Text(
+                                    snapshot.data.toString(),
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  child: Icon(Icons.shopping_cart),
+                                )
+                                // 5 == 0
+                                //     ? new Container()
+                                //     : Badge(
+                                //         badgeColor: Colors.red,
+                                //         badgeContent: Text(
+                                //           snapshot.data.toString(),
+                                //           style: TextStyle(color: Colors.white),
+                                //         ),
+                                //         child: Icon(Icons.shopping_cart),
+                                //       )
                               ],
                             );
                           }),
@@ -117,10 +129,14 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
               _loader.showLoader();
             }
             if (state is AddToCartSuccessState) {
+              print("success state has been called");
               _loader.hideLoader();
 
-              appState.updateCart(state.cart.items);
-              global.streamController.sink.add(state.cart.items);
+              int cartNum = state.cart == null ? state.currentCart.getCartItemsNumber(): state.cart.items;
+              // appState.updateCart(state.cart.items);
+              appState.updateCart(cartNum);
+              // global.streamController.sink.add(state.cart.items);
+              global.streamController.sink.add(cartNum);
 
               Fluttertoast.showToast(
                   msg: "Food Added to Cart",
@@ -214,10 +230,37 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "₦${oCcy.format(double.parse(widget.foodItem.price))}",
-                              style: TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: Text(
+                                      "₦${oCcy.format(double.parse(widget.foodItem.price))} per plate",
+                                      style: TextStyle(
+                                          fontSize: 20.0, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextFormField(
+                                      decoration: InputDecoration(
+                                        labelText: "Order Quantity",
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      keyboardType: TextInputType.number,
+                                      onChanged: (value){
+                                        orderQuantity = int.parse(value);
+                                        FocusScopeNode currentFocus = FocusScope.of(context);
+                                        currentFocus.unfocus();
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                             SizedBox(
                               height: 20.0,
@@ -243,21 +286,23 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                               onTap: () async {
                                 dynamic vendor =
                                     await userDao.getUser("nandom");
-                                print(vendor);
-                                if (vendor != null) {
-                                  CubitProvider.of<AddToCartCubit>(context)
-                                      .addToCart();
-                                  print("k");
-                                } else {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                          builder: (BuildContext context) =>
-                                              LoginScreen(
-                                                  userRepository:
-                                                      _userRepository,
-                                                  foodItem: widget.foodItem)),
-                                      (Route<dynamic> route) => false);
-                                }
+                                // print(vendor);
+                                // if (vendor != null) {
+                                //   CubitProvider.of<AddToCartCubit>(context)
+                                //       .addToCart();
+                                CubitProvider.of<AddToCartCubit>(context)
+                                    .addMenuToCart({"item":widget.foodItem,"quantity":orderQuantity,"price":double.parse(widget.foodItem.price)});
+                                  // print("k");
+                                // } else {
+                                //   Navigator.of(context).pushAndRemoveUntil(
+                                //       MaterialPageRoute(
+                                //           builder: (BuildContext context) =>
+                                //               LoginScreen(
+                                //                   userRepository:
+                                //                       _userRepository,
+                                //                   foodItem: widget.foodItem)),
+                                //       (Route<dynamic> route) => false);
+                                // }
                               },
                               child: Container(
                                 width: MediaQuery.of(context).size.width - 30,

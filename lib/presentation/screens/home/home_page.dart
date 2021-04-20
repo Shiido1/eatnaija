@@ -4,6 +4,8 @@ import 'package:eatnaija/common/app_state.dart';
 import 'package:eatnaija/common/resources.dart';
 import 'package:eatnaija/dao/user_dao.dart';
 import 'package:eatnaija/presentation/screens/cart/cart_items_page.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
+import 'package:eatnaija/presentation/screens/food_detail/bloc/add_to_cart_cubit.dart';
 import 'package:eatnaija/presentation/screens/home/home_screen.dart';
 import 'package:eatnaija/presentation/screens/order_history/food_order_page.dart';
 import 'package:eatnaija/presentation/screens/profile/profile_page.dart';
@@ -14,6 +16,7 @@ import 'package:eatnaija/common/globals.dart' as globals;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
 /// This is the stateful widget that the main application instantiates.
@@ -73,7 +76,7 @@ class _HomePageState extends State<HomePage> {
       HomeScreen(cartItems, (val) {
         setState(() {
           cartItems = val;
-          print(cartItems);
+          // print(cartItems);
           if (val != null) {
             Navigator.of(context).pop({'selection': cartItems});
           }
@@ -98,15 +101,18 @@ class _HomePageState extends State<HomePage> {
     }
 
     return CubitProvider(
-      create: (context) => CartCounterCubit(),
-      child: CubitListener<CartCounterCubit, CartCounterState>(
-        listener: (context, state) {
-          if (state.cartCount == 0) {
-            print("Cart number is ${state.cartCount}");
-          } else {
-            print("Cart is ${state.cartCount}");
-          }
-        },
+      // create: (context) => CartCounterCubit(),
+      // child: CubitListener<CartCounterCubit, CartCounterState>(
+      //   listener: (context, state) {
+      //     if (state.cartCount == 0) {
+      //       print("Cart number is ${state.cartCount}");
+      //     } else {
+      //       print("Cart is ${state.cartCount}");
+      //     }
+      //   },
+    create: (context) => AddToCartCubit(),
+    child: CubitListener<AddToCartCubit, AddToCartState>(
+      listener: (context, state) {},
         child: Scaffold(
           appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -124,25 +130,54 @@ class _HomePageState extends State<HomePage> {
                                 builder: (BuildContext context) =>
                                     new CartItemsPage()));
                           },
-                          child: StreamBuilder(
-                              stream: globals.numbersStream(),
+                          child: StreamBuilder<int>(
+                            // stream: global.numbersStream(),
+                              stream: globals.cartItemNumbers(),
+                              initialData: GetIt.I<CartItemsModel>().getCartItemsNumber(),
                               builder: (context, snapshot) {
-                                return Stack(
+                                return new Stack(
                                   children: <Widget>[
-                                    5 == 0
-                                        ? new Container()
-                                        : Badge(
-                                            badgeColor: Colors.red,
-                                            badgeContent: Text(
-                                              snapshot.data.toString(),
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                            child: Icon(Icons.shopping_cart),
-                                          )
+                                    Badge(
+                                      badgeColor: Colors.red,
+                                      badgeContent: Text(
+                                        snapshot.data.toString(),
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      child: Icon(Icons.shopping_cart),
+                                    )
+                                    // 5 == 0
+                                    //     ? new Container()
+                                    //     : Badge(
+                                    //         badgeColor: Colors.red,
+                                    //         badgeContent: Text(
+                                    //           snapshot.data.toString(),
+                                    //           style: TextStyle(color: Colors.white),
+                                    //         ),
+                                    //         child: Icon(Icons.shopping_cart),
+                                    //       )
                                   ],
                                 );
-                              })),
+                              }),
+                          // StreamBuilder(
+                          //     stream: globals.numbersStream(),
+                          //     builder: (context, snapshot) {
+                          //       return Stack(
+                          //         children: <Widget>[
+                          //           5 == 0
+                          //               ? new Container()
+                          //               : Badge(
+                          //                   badgeColor: Colors.red,
+                          //                   badgeContent: Text(
+                          //                     snapshot.data.toString(),
+                          //                     style: TextStyle(
+                          //                         color: Colors.white),
+                          //                   ),
+                          //                   child: Icon(Icons.shopping_cart),
+                          //                 )
+                          //         ],
+                          //       );
+                          //     })
+                      ),
                     )),
               ]),
           body: SingleChildScrollView(

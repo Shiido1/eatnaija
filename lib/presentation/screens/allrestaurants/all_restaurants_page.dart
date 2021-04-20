@@ -8,12 +8,14 @@ import 'package:eatnaija/presentation/screens/allrestaurants/model/all_food_port
 import 'package:eatnaija/presentation/screens/allrestaurants/model/all_restaurants_response.dart';
 import 'package:eatnaija/common/slide_route_transition.dart';
 import 'package:eatnaija/presentation/screens/cart/cart_items_page.dart';
+import 'package:eatnaija/presentation/screens/cart/model/cart_item_model.dart';
 import 'package:eatnaija/presentation/screens/restaurant_foods/restaurant_foods_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eatnaija/common/globals.dart' as global;
+import 'package:get_it/get_it.dart';
 
 import 'cubit/all_restaurants_cubit.dart';
 import 'model/all_food_equipment_response.dart';
@@ -55,11 +57,11 @@ class _AllRestaurantsPageState extends State<AllRestaurantsPage> {
     user = await userDao.getUser("nandom");
     // print(userDao);
 
-    var UserName = user["name"].toString().split(" ");
+    var UserName = user==null?"Guest":user["name"].toString().split(" ")[0];
 
     setState(() {
-      firstname = UserName[0];
-      cartItems = user["cart"];
+      firstname = UserName;
+      cartItems = user==null?[]:user["cart"];
     });
 
     // setState(() {
@@ -113,13 +115,15 @@ class _AllRestaurantsPageState extends State<AllRestaurantsPage> {
                                 new CartItemsPage()));
                       },
                       child: StreamBuilder<Object>(
-                          stream: global.numbersStream(),
+                          stream: global.cartItemNumbers(),
+                          initialData: GetIt.I<CartItemsModel>().getCartItemsNumber(),
                           builder: (context, snapshot) {
                             return new Stack(
                               children: <Widget>[
-                                5 == 0
-                                    ? new Container()
-                                    : Badge(
+                                // 5 == 0
+                                //     ? new Container()
+                                //     :
+                                Badge(
                                         badgeColor: Colors.red,
                                         badgeContent: Text(
                                           snapshot.data.toString(),
@@ -371,7 +375,7 @@ class _AllRestaurantsPageState extends State<AllRestaurantsPage> {
         break;
     }
 
-    print(restaurant);
+    // print(restaurant);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
