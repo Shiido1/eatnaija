@@ -2,6 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- for iOS 11 + -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>App needs location because its a food delivery app</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>App needs location because its a food delivery app</string>
+
+	<!-- additionally for iOS 9/10, if you need always permission -->
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>App needs location because its a food delivery app</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>

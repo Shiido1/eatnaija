@@ -100,7 +100,7 @@ class _FoodDetailPageState extends State<FoodDetailPage> {
                                     : Badge(
                                         badgeColor: Colors.red,
                                         badgeContent: Text(
-                                          snapshot.data.toString(),
+                                          snapshot.data==null? "0" : snapshot.data.toString(),
                                           style: TextStyle(color: Colors.white),
                                         ),
                                         child: Icon(Icons.shopping_cart),

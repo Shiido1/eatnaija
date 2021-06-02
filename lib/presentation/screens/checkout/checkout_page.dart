@@ -1,6 +1,6 @@
 import 'package:eatnaija/common/custom_loader_indicator.dart';
 import 'package:eatnaija/common/resources.dart';
-import 'package:eatnaija/common/slide_route_transition.dart';
+// import 'package:eatnaija/common/slide_route_transition.dart';
 import 'package:eatnaija/dao/user_dao.dart';
 import 'package:eatnaija/presentation/screens/checkout/cubit/checkout_cubit.dart';
 import 'package:eatnaija/presentation/screens/checkout/order_success_page.dart';
@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rave_flutter/rave_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class CheckoutPage extends StatefulWidget {
   final int total;
@@ -21,7 +22,7 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  int delivery = 1000;
+  int delivery = 10;
   double mysummary;
   CustomLoader _loader;
   String address, phone;
@@ -46,11 +47,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     user = await userDao.getUser("nandom");
 
     var UserName =  user["name"].toString().split(" ");
+    print(UserName);
 
     setState(() {
       // print(user["address"]);
 
-      if((UserName?.length ?? 0) > 2 ){
+      if(UserName.length > 0 ){
         firstname = UserName[0];
         lastname = UserName[1];
       }
@@ -111,7 +113,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Container(
-                                  height: 140.0,
+                                  height: 150.0,
                                   width:
                                       MediaQuery.of(context).size.width - 30.0,
                                   decoration: BoxDecoration(
@@ -174,7 +176,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                               ),
                                               child: Text(
                                                 address != null
-                                                    ? address
+                                                    ? address.length<=60? address : "${address.substring(0, 60)}..."
                                                     : "No address found",
                                                 style: TextStyle(
                                                     color: Colors.white
@@ -292,10 +294,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     borderRadius: BorderRadius.circular(8.0),
                                   ),
                                   child: Center(
-                                      child: Text(
-                                    "Checkout",
-                                    style: TextStyle(color: Colors.white),
-                                  )),
+                                    child: Text(
+                                      "Checkout",
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  ),
                                 ),
                               )
                             ],
@@ -307,7 +310,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 },
               ),
             ),
-          )),
+          )
+        ),
     );
   }
 
@@ -326,16 +330,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
     //     address = result.toString();
     //   });
     // } else {
-    //   print("we are ready");
+    //   print("we are ready");r
     // }
   }
 
+    // double amount = 3600;
+    // double flutterWaveCharge = (1.4*amount)/100;
+    // double ownerCharge = (1.5*amount)/100;
+    // double logistics = 500;
+    // double total = amount + flutterWaveCharge + ownerCharge + logistics;
+    // print (total);
+
   Future<RaveResult> startPayment(BuildContext context) async {
+    final txRef = Uuid().v4();
+    final orderRef = Uuid().v4();
     var initializer = RavePayInitializer(
-        amount: mysummary,
+        amount: 100,
         publicKey: Resources.PUBLIC_KEY,
         encryptionKey: Resources.ENCRYPTION_KEY,
-        subAccounts: null)
+        // subAccounts: null
+      //   [
+      //     SubAccount("RS_2019556A04DD51B694BED31CF1D84994", "0.015"),
+      // ]
+        )
     ..acceptAchPayments = true
       ..companyName = Text("EatNaija")
       ..companyLogo = Image.asset("assets/images/eatnaija.png")
@@ -345,8 +362,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ..fName = firstname
       ..lName = lastname
       ..narration = 'Food payment'
-      ..txRef = 'SJDF232323'
-      ..orderRef = '23023LKLDS'
+      ..txRef = txRef
+      ..orderRef = orderRef
       ..acceptAccountPayments = true
       ..acceptCardPayments = true
       ..displayEmail = true
@@ -361,4 +378,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     print(response);
     return response;
   }
+
+  
 }

@@ -220,7 +220,8 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
                                                 : Badge(
                                                     badgeColor: Colors.red,
                                                     badgeContent: Text(
-                                                      'cartItems.toString()',
+                                                      cartItems==null? "0": 
+                                                      '${cartItems.toString()}',
                                                       style: TextStyle(
                                                           color: Colors.white),
                                                     ),
@@ -255,8 +256,8 @@ class _RestaurantFoodPageState extends State<RestaurantFoodPage> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Center(
-                                          child: Commons.showEmptyListMessage(
-                                              "No Items found"))
+                                        child: Commons.showEmptyListMessage("No Items found")
+                                            )
                                     ],
                                   )
                                 : ListView.builder(

@@ -3,11 +3,17 @@ import 'package:eatnaija/common/resources.dart';
 import 'package:eatnaija/common/validators.dart';
 import 'package:eatnaija/dao/user_dao.dart';
 import 'package:eatnaija/presentation/screens/update_address/cubit/update_address_cubit.dart';
+import 'package:eatnaija/presentation/screens/update_address/place_service.dart';
 import 'package:eatnaija/presentation/screens/update_address/update_address_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cubit/flutter_cubit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+
+import 'location_search.dart';
+import 'package:uuid/uuid.dart';
 
 class UpdateAddressForm extends StatefulWidget {
   final String callback;
@@ -48,8 +54,8 @@ class _UpdateAddressFormState extends State<UpdateAddressForm>
 
 
   getUser() async {
+    print("getting user");
     user = await userDao.getUser("nandom");
-    print("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
     print(user);
 
 
@@ -146,10 +152,29 @@ class _UpdateAddressFormState extends State<UpdateAddressForm>
                     ),
                     SizedBox(
                       height: 20.0,
-                    ),                    TextFormField(
+                    ),                    
+                    TextFormField(
                       maxLines: 4,
                       keyboardType: TextInputType.multiline,
                       controller: _usernameController,
+                      onTap: () async{
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(builder: (context)=> LocationSearch())
+                          // );
+                          // generate a new token here
+                          final sessionToken = Uuid().v4();
+                          final Suggestion result = await showSearch(
+                            context: context,
+                            delegate: LocationSearch(sessionToken),
+                          );
+                          // This will change the text displayed in the TextField
+                          if (result != null) {
+                            setState(() {
+                               _usernameController.text = result.description;
+                            });
+                          }
+                        },
                       validator: (value) =>
                           value.isEmpty ? "Address is required" : null,
                       decoration: InputDecoration(
@@ -169,9 +194,65 @@ class _UpdateAddressFormState extends State<UpdateAddressForm>
                             borderRadius: BorderRadius.circular(10.0)),
                       ),
                     ),
-                    SizedBox(
-                      height: 20.0,
+                    SizedBox(height: 20.0,),
+
+                    Container(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Divider(color: Colors.grey, thickness: 1.0),
+                          ),
+                          Container(
+                            width: 30,
+                            child: Center(
+                              child:
+                                Text("or", style: TextStyle(color: Colors.grey)),
+                              )
+                          ),
+                          Expanded(
+                            child: Divider(color: Colors.grey, thickness: 1.0),
+                          ),
+                      ],),
                     ),
+                    SizedBox(height: 20.0,),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            blurRadius: 10.0, // soften the shadow
+                            spreadRadius: .0, //extend the shadow
+                            offset: Offset(
+                              5.0, // Move to right 10  horizontally
+                              5.0, // Move to bottom 5 Vertically
+                            ),
+                          )
+                        ],
+                      ),
+                      child: FlatButton(
+                        onPressed: _determinePosition,
+                        height: 50,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                              color: Colors.grey.withOpacity(0.1),
+                              width: 1,
+                              style: BorderStyle.solid
+                            ), 
+                          borderRadius: BorderRadius.circular(50)
+                          ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.location_searching, color: Colors.grey),
+                            SizedBox(width: 10),
+                            Text("Use current location", style: TextStyle(color: Colors.grey, fontSize: 14))
+                          ],
+                        )
+                      )
+                    ),
+                    SizedBox(height: 20.0,),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.85,
                       height: MediaQuery.of(context).size.width * 0.18,
@@ -202,5 +283,62 @@ class _UpdateAddressFormState extends State<UpdateAddressForm>
         },
       ),
     );
+  }
+
+
+  /// Determine the current position of the device.
+///
+/// When the location services are not enabled or permissions
+/// are denied the `Future` will return an error.
+Future<Position> _determinePosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Location permissions are permantly denied, we cannot request permissions.');
+  }
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      return Future.error(
+          'Location permissions are denied (actual value: $permission).');
+    }
+  }
+
+  Position position = await Geolocator.getCurrentPosition();
+  // Position positon2 = await Geolocator.;
+  print(position);
+  _getAddressFromLatLng(position.latitude,position.longitude);
+
+  return position;
+}
+
+_getAddressFromLatLng(latitude, longitude) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        latitude,
+        longitude
+      );
+
+      Placemark place = placemarks[0];
+      setState(() {
+              _usernameController.text = "${place.street}, ${place.locality},${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.country}.";
+            });
+      print("${place.street}, ${place.locality},${place.subAdministrativeArea}, ${place.postalCode}, ${place.administrativeArea}, ${place.country}");
+      // setState(() {
+      //   _currentAddress = "${place.locality}, ${place.postalCode}, ${place.country}";
+      // });
+    } catch (e) {
+      print(e);
+    }
   }
 }

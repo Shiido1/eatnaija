@@ -19,6 +19,8 @@ import 'package:eatnaija/common/globals.dart' as global;
 import 'package:provider/provider.dart';
 
 import 'cubit/all_cart_items_cubit.dart';
+import 'package:geolocator/geolocator.dart';
+
 
 class CartItemsPage extends StatefulWidget {
   @override
@@ -54,6 +56,11 @@ class _CartItemsPageState extends State<CartItemsPage> {
     //   username = vendor["company_name"];
     // });
   }
+
+  // getDistance() async{
+  //   double distanceInMeters = Geolocator.distanceBetween(52.2165157, 6.9437819, 52.3546274, 4.8285838);
+  //   print(distanceInMeters);
+  // }
 
   @override
   void initState() {
@@ -330,6 +337,12 @@ class _CartItemsPageState extends State<CartItemsPage> {
                                                     SizedBox(
                                                       height: 20.0,
                                                     ),
+                                                    // FlatButton(
+                                                    //   onPressed: (){
+                                                    //     getDistance();
+                                                    //   },
+                                                    //   child:Text("Get distance")
+                                                    // ),
                                                     _checkoutButton(
                                                         context, total)
                                                   ],

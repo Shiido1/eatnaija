@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     firstname = "";
-    userImage = "";
     super.initState();
     if (user != null) {
       getUser();
@@ -68,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   flex: 2,
@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         "Welcome",
-                        style: TextStyle(fontSize: 20.0, color: Colors.grey),
+                        style: TextStyle(fontSize: 20.0, color: Colors.black),
                       ),
                       Text(firstname,
                           style: TextStyle(

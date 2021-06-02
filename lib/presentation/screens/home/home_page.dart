@@ -134,7 +134,7 @@ class _HomePageState extends State<HomePage> {
                                         : Badge(
                                             badgeColor: Colors.red,
                                             badgeContent: Text(
-                                              snapshot.data.toString(),
+                                              snapshot.data==null? "0" : snapshot.data.toString(),
                                               style: TextStyle(
                                                   color: Colors.white),
                                             ),
